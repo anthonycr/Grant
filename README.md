@@ -12,7 +12,9 @@ ActivityCompat.checkSelfPermission(Activity activity, String permission)
 ```
 You need to compare this to `PackageManager.PERMISSION_GRANTED`. If you need to check if you have permission for multiple permissions, then you have to have another condition using the above method. Already your code is getting convoluted. You also need to keep track of what permissions you don't have so you can ask for only those. If you already have one out of three permissions, you don't want to ask the user for that permission again otherwise they could change their mind and revoke your permission. Sooooo, once you've handled that, you request permissions using:
 ```java
-ActivityCompat.requestPermissions(Activity activity, String[] permissionsToRequest, int REQUEST_CODE);
+ActivityCompat.requestPermissions(Activity activity, 
+                                  String[] permissionsToRequest, 
+                                  int REQUEST_CODE);
 ```
 But, you aren't done yet. Then, you have to handle the result of those requests in
 ```java
