@@ -14,6 +14,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -42,8 +43,8 @@ public final class PermissionsManager {
      * in the PermissionsResultAction object so that it will be notified of changes
      * made to these permissions.
      *
-     * @param permissions the required permissions for the action to be executed
-     * @param action      the action to add to the current list of pending actions
+     * @param permissions the required permissions for the action to be executed.
+     * @param action      the action to add to the current list of pending actions.
      */
     private synchronized void addPendingAction(@NonNull String[] permissions, @Nullable PermissionsResultAction action) {
         if (action == null) {
@@ -51,6 +52,17 @@ public final class PermissionsManager {
         }
         action.registerPermissions(permissions);
         mPendingActions.add(action);
+    }
+
+    /**
+     * This method is used internally to remove a PendingAction from the list when it
+     * has either had a permission denied, or when all permissions have been granted
+     * and the action has run. Either way, the methods should not be triggered again.
+     *
+     * @param action the action that should be removed.
+     */
+    protected synchronized void removePendingAction(@NonNull PermissionsResultAction action) {
+        mPendingActions.remove(action);
     }
 
     /**
@@ -108,9 +120,9 @@ public final class PermissionsManager {
      * This is only nullable as a courtesy for Fragments where getActivity() may yeild null
      * if the Fragment is not currently added to its parent Activity.
      *
-     * @param activity    the activity necessary to request the permissions
-     * @param permissions the list of permissions to request for the {@link PermissionsResultAction}
-     * @param action      the PermissionsResultAction to notify when the permissions are granted or denied
+     * @param activity    the activity necessary to request the permissions.
+     * @param permissions the list of permissions to request for the {@link PermissionsResultAction}.
+     * @param action      the PermissionsResultAction to notify when the permissions are granted or denied.
      */
     public synchronized void requestPermissionsIfNecessaryForResult(@Nullable Activity activity,
                                                                     @NonNull String[] permissions,
@@ -156,8 +168,8 @@ public final class PermissionsManager {
      * passed to that method. It will notify all the pending PermissionsResultAction objects currently
      * in the queue, and will remove the permissions request from the list of pending requests.
      *
-     * @param permissions the permissions that have changed
-     * @param results     the values for each permission
+     * @param permissions the permissions that have changed.
+     * @param results     the values for each permission.
      */
     public synchronized void notifyPermissionsChange(@NonNull String[] permissions, @NonNull int[] results) {
         int size = permissions.length;
@@ -165,12 +177,14 @@ public final class PermissionsManager {
             size = results.length;
         }
         for (int n = 0; n < size; n++) {
-            for (PermissionsResultAction result : mPendingActions) {
-                result.onResult(permissions[n], results[n]);
+            Iterator<PermissionsResultAction> iterator = mPendingActions.iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().onResult(permissions[n], results[n])) {
+                    iterator.remove();
+                }
                 mPendingRequests.remove(permissions[n]);
             }
         }
     }
-
 
 }

@@ -30,18 +30,23 @@ public abstract class PermissionsResultAction {
      * if the permission affects the state or not and whether it can proceed with
      * calling onGranted or if onDenied should be called.
      *
-     * @param permission the permission that changed
-     * @param result     the result for that permission
+     * @param permission the permission that changed.
+     * @param result     the result for that permission.
+     * @return this method returns true if its primary action has been completed
+     * and it should be removed from the data structure holding a reference to it.
      */
-    public synchronized final void onResult(String permission, int result) {
+    public synchronized final boolean onResult(String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             mPermissions.remove(permission);
             if (mPermissions.isEmpty()) {
                 onGranted();
+                return true;
             }
         } else {
             onDenied(permission);
+            return true;
         }
+        return false;
     }
 
     /**
