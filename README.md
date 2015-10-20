@@ -129,7 +129,7 @@ Note: you will still need to handle the permission checks before executing your 
 
 ####Other Use Cases
 
-Additionally, the library contains a couple methods to check whether you have permission for one or several permissions that is slightly less verbose than using one of the compat libaries. Particularly `boolean hasAllPermissions(@Nullable Context context, @NonNull String[] permissions)` is helpful when checking if you have all of several permissions quickly. An example use case would be if you requested all permissions when you first start the app, but the user denied some of those permissions, so elsewhere in your app you want to know if you have all the permissions necessary for an action or not so you can display a different UI element.
+Additionally, the library contains a couple methods to check whether you have permission for one or several permissions that is slightly less verbose than using one of the compat libaries. Particularly `boolean hasAllPermissions(Context context, String[] permissions)` is helpful when checking if you have all of several permissions quickly. An example use case would be if you requested all permissions when you first start the app, but the user denied some of those permissions, so elsewhere in your app you want to know if you have all the permissions necessary for an action or not so you can display a different UI element.
 
 And that's it! Contributions and suggestions are welcome. Check out the sample application on how the library can be used correctly in actual code if these examples didn't make sense.
 
