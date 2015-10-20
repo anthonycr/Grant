@@ -35,7 +35,8 @@ public abstract class PermissionsResultAction {
      * @return this method returns true if its primary action has been completed
      * and it should be removed from the data structure holding a reference to it.
      */
-    public synchronized final boolean onResult(String permission, int result) {
+    @SuppressWarnings("unused")
+    public synchronized final boolean onResult(@NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             mPermissions.remove(permission);
             if (mPermissions.isEmpty()) {
@@ -56,6 +57,7 @@ public abstract class PermissionsResultAction {
      *
      * @param perms the permissions to listen for
      */
+    @SuppressWarnings("unused")
     public synchronized final void registerPermissions(@NonNull String[] perms) {
         Collections.addAll(mPermissions, perms);
     }

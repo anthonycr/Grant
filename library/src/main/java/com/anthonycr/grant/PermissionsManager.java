@@ -2,6 +2,7 @@ package com.anthonycr.grant;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -61,8 +62,51 @@ public final class PermissionsManager {
      *
      * @param action the action that should be removed.
      */
-    protected synchronized void removePendingAction(@NonNull PermissionsResultAction action) {
+    private synchronized void removePendingAction(@NonNull PermissionsResultAction action) {
         mPendingActions.remove(action);
+    }
+
+    /**
+     * This static method can be used to check whether or not you have a specific permission.
+     * It is basically a less verbose method of using {@link ActivityCompat#checkSelfPermission(Context, String)}
+     * and will simply return a boolean whether or not you have the permission. If you pass
+     * in a null Context object, it will return false as otherwise it cannot check the permission.
+     * However, the Activity parameter is nullable so that you can pass in a reference that you
+     * are not always sure will be valid or not (e.g. getActivity() from Fragment).
+     *
+     * @param context    the Context necessary to check the permission
+     * @param permission the permission to check
+     * @return true if you have been granted the permission, false otherwise
+     */
+    @SuppressWarnings("unused")
+    public static boolean hasPermission(@Nullable Context context, @NonNull String permission) {
+        return context != null && ActivityCompat.checkSelfPermission(context, permission)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * This static method can be used to check whether or not you have several specific permissions.
+     * It is simpler than checking using {@link ActivityCompat#checkSelfPermission(Context, String)}
+     * for each permission and will simply return a boolean whether or not you have all the permissions.
+     * If you pass in a null Context object, it will return false as otherwise it cannot check the
+     * permission. However, the Activity parameter is nullable so that you can pass in a reference
+     * that you are not always sure will be valid or not (e.g. getActivity() from Fragment).
+     *
+     * @param context     the Context necessary to check the permission
+     * @param permissions the permissions to check
+     * @return true if you have been granted all the permissions, false otherwise
+     */
+    @SuppressWarnings("unused")
+    public static boolean hasAllPermissions(@Nullable Context context, @NonNull String[] permissions) {
+        if (context == null) {
+            return false;
+        }
+        boolean hasAllPermissions = true;
+        for (String perm : permissions) {
+            hasAllPermissions &= ActivityCompat.checkSelfPermission(context, perm)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return hasAllPermissions;
     }
 
     /**
@@ -79,6 +123,7 @@ public final class PermissionsManager {
      * @param activity the Activity necessary to request and check permissions.
      * @param action   the PermissionsResultAction used to notify you of permissions being accepted.
      */
+    @SuppressWarnings("unused")
     public synchronized void requestAllManifestPermissionsIfNecessary(final @Nullable Activity activity,
                                                                       final @Nullable PermissionsResultAction action) {
         if (activity == null) {
@@ -124,6 +169,7 @@ public final class PermissionsManager {
      * @param permissions the list of permissions to request for the {@link PermissionsResultAction}.
      * @param action      the PermissionsResultAction to notify when the permissions are granted or denied.
      */
+    @SuppressWarnings("unused")
     public synchronized void requestPermissionsIfNecessaryForResult(@Nullable Activity activity,
                                                                     @NonNull String[] permissions,
                                                                     @Nullable PermissionsResultAction action) {
@@ -171,6 +217,7 @@ public final class PermissionsManager {
      * @param permissions the permissions that have changed.
      * @param results     the values for each permission.
      */
+    @SuppressWarnings("unused")
     public synchronized void notifyPermissionsChange(@NonNull String[] permissions, @NonNull int[] results) {
         int size = permissions.length;
         if (results.length < size) {
