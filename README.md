@@ -11,7 +11,7 @@
 The Android permissions model has changed in Android Marshmallow. Now you can't count on all the permissions you've declared in your `AndroidManifest` file being granted at run-time. The user has control over granting these permissions to your app and can revoke them at any time, even while your app is running! Because of this, you need to check if you have permission to run certain code before executing it.
 
 
-The new Android permissions API is fairly simple to understand, but it can introduce unnecesary complexity into the flow of your application. Let's use the the `WRITE_EXTERNAL_STORAGE` permission as an example. You want to write a String to a file on the external storage of the device.
+The new Android permissions API is fairly simple to understand, but it can introduce unnecessary complexity into the flow of your application. Let's use the the `WRITE_EXTERNAL_STORAGE` permission as an example of this unnecessary complexity. You want to write a String to a file on the external storage of the device.
 
 First, you need to check whether you have permission to access external storage:
 ```java
