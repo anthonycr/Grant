@@ -14,7 +14,7 @@ The Android permissions model has changed in Android Marshmallow. Now you can't 
 The new Android permissions API is fairly simple to understand, but it can introduce unnecesary complexity into the flow of your application. Let's use the the `WRITE_EXTERNAL_STORAGE` permission as an example. You want to write a String to a file on the external storage of the device.
 
 First, you need to check whether you have permission to access external storage:
-```
+```java
 Activity activity = this;
 String permission = Manifest.Permisions.WRITE_EXTERNAL_STORAGE;
 if(ActivityCompat.checkSelfPermission(activity, permission) 
