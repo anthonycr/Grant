@@ -1,5 +1,6 @@
 # Grant
 ####Simplifying Android Permissions###
+[![Build Status](https://travis-ci.org/anthonycr/Grant.svg)](https://travis-ci.org/anthonycr/Grant)
 
 ##What can this library do?
 * It can request all your declared permissions in a single method and give you a callback when they have been granted.
