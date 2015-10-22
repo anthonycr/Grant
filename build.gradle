@@ -10,12 +10,13 @@ subprojects {
         }
         dependencies {
             classpath 'com.android.tools.build:gradle:1.3.0'
+            classpath 'com.github.dcendents:android-maven-plugin:1.2'
         }
     }
 }
 
 task clean(type: Delete) {
-    delete rootProject.buildDir
+    delete project.buildDir
 }
 
 ext {
@@ -23,4 +24,8 @@ ext {
     compileSdkVersion = 23
     targetSdkVersion = compileSdkVersion
     buildToolsVersion = "23.0.1"
+
+    PUBLISH_GROUP_ID = 'com.anthonycr.grant'
+    PUBLISH_ARTIFACT_ID = 'permissions'
+    PUBLISH_VERSION = '1.0'
 }
