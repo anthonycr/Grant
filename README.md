@@ -2,6 +2,10 @@
 ####Simplifying Android Permissions###
 [![Build Status](https://travis-ci.org/anthonycr/Grant.svg)](https://travis-ci.org/anthonycr/Grant)
 
+###Gradle usage
+* `compile 'com.anthonycr.grant:permissions:1.0'`
+* Available from jcenter
+
 ##What can this library do?
 * It can request all your declared permissions in a single method and give you a callback when they have been granted.
 * It can perform a task at some point in the future that requires a specific permission by checking if the app has the permission and requesting the permission if you do not already have it.
