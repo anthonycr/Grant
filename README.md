@@ -113,7 +113,7 @@ You can add any number of permissions to a request, and the `PermissionsResultAc
 
 ####Global Use Case
 
-But, maybe in addition to this, you just want to get it out of the way and request all the permissions up front so that you don't need to break the user flow later. In that case, you can just use a simple method which reads the permissions you want from your manifest and requests them for you like follows:
+But, maybe in addition to this, you just need to get it out of the way and request all the permissions up front so that you don't need to break the user flow later (this is not recommended as it's bad for the user, but maybe your PM is requiring you to do it). In that case, you can just use a simple method which reads the permissions you want from your manifest and requests them for you like follows:
 
 ```java
 PermissionsManager.getInstance().requestAllManifestPermissionsIfNecessary(this, 
