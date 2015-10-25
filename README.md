@@ -138,7 +138,7 @@ Additionally, the library contains a couple methods to check whether you have pe
 
 And that's it! Contributions and suggestions are welcome. Check out the sample application on how the library can be used correctly in actual code if these examples didn't make sense.
 
-Got questions? Hit me up on [twitter](twitter.com/RestainoAnthony).
+Got questions? Hit me up on [twitter](https://twitter.com/RestainoAnthony).
 
 ##License
 Copyright 2015 Anthony Restaino
