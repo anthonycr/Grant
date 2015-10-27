@@ -1,7 +1,6 @@
 package com.anthonycr.grant;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -11,6 +10,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -47,23 +47,13 @@ public final class PermissionsManager {
      * @param permissions the required permissions for the action to be executed.
      * @param action      the action to add to the current list of pending actions.
      */
-    private synchronized void addPendingAction(@NonNull String[] permissions, @Nullable PermissionsResultAction action) {
+    private synchronized void addPendingAction(@NonNull String[] permissions,
+                                               @Nullable PermissionsResultAction action) {
         if (action == null) {
             return;
         }
         action.registerPermissions(permissions);
         mPendingActions.add(action);
-    }
-
-    /**
-     * This method is used internally to remove a PendingAction from the list when it
-     * has either had a permission denied, or when all permissions have been granted
-     * and the action has run. Either way, the methods should not be triggered again.
-     *
-     * @param action the action that should be removed.
-     */
-    private synchronized void removePendingAction(@NonNull PermissionsResultAction action) {
-        mPendingActions.remove(action);
     }
 
     /**
@@ -209,9 +199,65 @@ public final class PermissionsManager {
     }
 
     /**
-     * This method notifies the PermissionsManager that the permissions have change. It should
-     * be called from the Activity callback onRequestPermissionsResult() with the variables
-     * passed to that method. It will notify all the pending PermissionsResultAction objects currently
+     * This method should be used to execute a {@link PermissionsResultAction} for the array
+     * of permissions passed to this method. This method will request the permissions if
+     * they need to be requested (i.e. we don't have permission yet) and will add the
+     * PermissionsResultAction to the queue to be notified of permissions being granted or
+     * denied. In the case of pre-Android Marshmallow, permissions will be granted immediately.
+     * The Fragment variable is used, but if {@link Fragment#getActivity()} returns null, this method
+     * will fail to work as the activity reference is necessary to check for permissions.
+     *
+     * @param fragment    the fragment necessary to request the permissions.
+     * @param permissions the list of permissions to request for the {@link PermissionsResultAction}.
+     * @param action      the PermissionsResultAction to notify when the permissions are granted or denied.
+     */
+    @SuppressWarnings("unused")
+    public synchronized void requestPermissionsIfNecessaryForResult(@NonNull Fragment fragment,
+                                                                    @NonNull String[] permissions,
+                                                                    @Nullable PermissionsResultAction action) {
+        Activity activity = fragment.getActivity();
+        if (activity == null) {
+            return;
+        }
+        addPendingAction(permissions, action);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            for (String perm : permissions) {
+                if (action != null) {
+                    if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                        action.onResult(perm, PackageManager.PERMISSION_DENIED);
+                    } else {
+                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                    }
+                }
+            }
+        } else {
+            List<String> permList = new ArrayList<>(1);
+            for (String perm : permissions) {
+                if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                    if (!mPendingRequests.contains(perm)) {
+                        permList.add(perm);
+                    }
+                } else {
+                    if (action != null) {
+                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                    }
+                }
+            }
+            if (!permList.isEmpty()) {
+                String[] permsToRequest = permList.toArray(new String[permList.size()]);
+                mPendingRequests.addAll(permList);
+                fragment.requestPermissions(permsToRequest, 1);
+            }
+        }
+    }
+
+    /**
+     * This method notifies the PermissionsManager that the permissions have change. If you are making
+     * the permissions requests using an Activity, then this method should be called from the
+     * Activity callback onRequestPermissionsResult() with the variables passed to that method. If
+     * you are passing a Fragment to make the permissions request, then you should call this in
+     * the {@link Fragment#onRequestPermissionsResult(int, String[], int[])} method.
+     * It will notify all the pending PermissionsResultAction objects currently
      * in the queue, and will remove the permissions request from the list of pending requests.
      *
      * @param permissions the permissions that have changed.
@@ -223,14 +269,16 @@ public final class PermissionsManager {
         if (results.length < size) {
             size = results.length;
         }
-        for (int n = 0; n < size; n++) {
-            Iterator<PermissionsResultAction> iterator = mPendingActions.iterator();
-            while (iterator.hasNext()) {
+        Iterator<PermissionsResultAction> iterator = mPendingActions.iterator();
+        while (iterator.hasNext()) {
+            for (int n = 0; n < size; n++) {
                 if (iterator.next().onResult(permissions[n], results[n])) {
                     iterator.remove();
                 }
-                mPendingRequests.remove(permissions[n]);
             }
+        }
+        for (int n = 0; n < size; n++) {
+            mPendingRequests.remove(permissions[n]);
         }
     }
 
