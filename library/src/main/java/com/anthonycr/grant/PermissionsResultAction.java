@@ -1,6 +1,8 @@
 package com.anthonycr.grant;
 
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import java.util.Collections;
@@ -19,6 +21,23 @@ import java.util.Set;
 public abstract class PermissionsResultAction {
 
     private final Set<String> mPermissions = new HashSet<>(1);
+    private Looper mLooper = Looper.getMainLooper();
+
+    /**
+     * Default Constructor
+     */
+    public PermissionsResultAction() {}
+
+    /**
+     * Alternate Constructor. Pass the looper you wish the PermissionsResultAction
+     * callbacks to be executed on if it is not the current Looper. For instance,
+     * if you are making a permissions request from a background thread but wish the
+     * callback to be on the UI thread, use this constructor to specify the UI Looper.
+     *
+     * @param looper the looper that the callbacks will be called using.
+     */
+    @SuppressWarnings("unused")
+    public PermissionsResultAction(@NonNull Looper looper) {mLooper = looper;}
 
     public abstract void onGranted();
 
@@ -35,16 +54,25 @@ public abstract class PermissionsResultAction {
      * @return this method returns true if its primary action has been completed
      * and it should be removed from the data structure holding a reference to it.
      */
-    @SuppressWarnings("unused")
-    public synchronized final boolean onResult(@NonNull String permission, int result) {
+    public synchronized final boolean onResult(final @NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             mPermissions.remove(permission);
             if (mPermissions.isEmpty()) {
-                onGranted();
+                new Handler(mLooper).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        onGranted();
+                    }
+                });
                 return true;
             }
         } else {
-            onDenied(permission);
+            new Handler(mLooper).post(new Runnable() {
+                @Override
+                public void run() {
+                    onDenied(permission);
+                }
+            });
             return true;
         }
         return false;
@@ -57,7 +85,6 @@ public abstract class PermissionsResultAction {
      *
      * @param perms the permissions to listen for
      */
-    @SuppressWarnings("unused")
     public synchronized final void registerPermissions(@NonNull String[] perms) {
         Collections.addAll(mPermissions, perms);
     }
