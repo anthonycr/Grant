@@ -13,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +30,7 @@ public final class PermissionsManager {
     private static final PermissionsManager INSTANCE = new PermissionsManager();
 
     private final Set<String> mPendingRequests = new HashSet<>(1);
-    private final List<PermissionsResultAction> mPendingActions = new ArrayList<>(1);
+    private final List<WeakReference<PermissionsResultAction>> mPendingActions = new ArrayList<>(1);
 
     public static PermissionsManager getInstance() {
         return INSTANCE;
@@ -53,7 +54,7 @@ public final class PermissionsManager {
             return;
         }
         action.registerPermissions(permissions);
-        mPendingActions.add(action);
+        mPendingActions.add(new WeakReference<>(action));
     }
 
     /**
@@ -269,10 +270,11 @@ public final class PermissionsManager {
         if (results.length < size) {
             size = results.length;
         }
-        Iterator<PermissionsResultAction> iterator = mPendingActions.iterator();
+        Iterator<WeakReference<PermissionsResultAction>> iterator = mPendingActions.iterator();
         while (iterator.hasNext()) {
             for (int n = 0; n < size; n++) {
-                if (iterator.next().onResult(permissions[n], results[n])) {
+                PermissionsResultAction action = iterator.next().get();
+                if (action == null || action.onResult(permissions[n], results[n])) {
                     iterator.remove();
                 }
             }
