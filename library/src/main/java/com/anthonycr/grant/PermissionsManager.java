@@ -272,10 +272,11 @@ public final class PermissionsManager {
         }
         Iterator<WeakReference<PermissionsResultAction>> iterator = mPendingActions.iterator();
         while (iterator.hasNext()) {
+            PermissionsResultAction action = iterator.next().get();
             for (int n = 0; n < size; n++) {
-                PermissionsResultAction action = iterator.next().get();
                 if (action == null || action.onResult(permissions[n], results[n])) {
                     iterator.remove();
+                    break;
                 }
             }
         }
