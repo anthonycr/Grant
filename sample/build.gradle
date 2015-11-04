@@ -8,8 +8,8 @@ android {
         applicationId "com.anthonycr.sample"
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode project.versionCode
+        versionName project.versionName
     }
     buildTypes {
         debug {
