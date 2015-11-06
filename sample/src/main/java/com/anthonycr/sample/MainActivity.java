@@ -53,11 +53,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Button writeStorage = (Button) findViewById(R.id.button_write_storage);
         Button readStorage = (Button) findViewById(R.id.button_read_storage);
+        Button readContacts = (Button) findViewById(R.id.button_read_contacts);
 
         this.textView = (TextView) findViewById(R.id.text);
 
         writeStorage.setOnClickListener(this);
         readStorage.setOnClickListener(this);
+        readContacts.setOnClickListener(this);
     }
 
     /**
@@ -141,6 +143,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             public void onGranted() {
                                 readFromStorage();
+                            }
+
+                            @Override
+                            public void onDenied(String permission) {
+                                String message = String.format(Locale.getDefault(), getString(R.string.message_denied), permission);
+                                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                );
+                break;
+            case R.id.button_read_contacts:
+                PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(this,
+                        new String[]{Manifest.permission.READ_CONTACTS}, new PermissionsResultAction() {
+
+                            @Override
+                            public void onGranted() {
+                                ContactsUtils.readPhoneContacts(MainActivity.this);
                             }
 
                             @Override
