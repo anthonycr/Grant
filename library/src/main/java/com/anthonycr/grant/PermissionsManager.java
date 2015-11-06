@@ -57,6 +57,16 @@ public final class PermissionsManager {
         mPendingActions.add(new WeakReference<>(action));
     }
 
+    private synchronized void removePendingAction(PermissionsResultAction action) {
+        for (Iterator<WeakReference<PermissionsResultAction>> iterator = mPendingActions.iterator();
+             iterator.hasNext(); ) {
+            WeakReference<PermissionsResultAction> weakRef = iterator.next();
+            if (weakRef.get() == action) {
+                iterator.remove();
+            }
+        }
+    }
+
     /**
      * This static method can be used to check whether or not you have a specific permission.
      * It is basically a less verbose method of using {@link ActivityCompat#checkSelfPermission(Context, String)}
@@ -172,7 +182,10 @@ public final class PermissionsManager {
             doPermissionWorkBeforeAndroidM(activity, permissions, action);
         } else {
             List<String> permList = getPermissionsListToRequest(activity, permissions, action);
-            if (!permList.isEmpty()) {
+            if (permList.isEmpty()) {
+                //if there is no permission to request, there is no reason to keep the action int the list
+                removePendingAction(action);
+            } else {
                 String[] permsToRequest = permList.toArray(new String[permList.size()]);
                 mPendingRequests.addAll(permList);
                 ActivityCompat.requestPermissions(activity, permsToRequest, 1);
@@ -206,7 +219,10 @@ public final class PermissionsManager {
             doPermissionWorkBeforeAndroidM(activity, permissions, action);
         } else {
             List<String> permList = getPermissionsListToRequest(activity, permissions, action);
-            if (!permList.isEmpty()) {
+            if (permList.isEmpty()) {
+                //if there is no permission to request, there is no reason to keep the action int the list
+                removePendingAction(action);
+            } else {
                 String[] permsToRequest = permList.toArray(new String[permList.size()]);
                 mPendingRequests.addAll(permList);
                 fragment.requestPermissions(permsToRequest, 1);
