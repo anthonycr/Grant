@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * A class to help you manage your permissions simply.
  */
-public final class PermissionsManager {
+public class PermissionsManager {
 
     private static final String TAG = PermissionsManager.class.getSimpleName();
     private static final PermissionsManager INSTANCE = new PermissionsManager();
