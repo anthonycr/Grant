@@ -54,7 +54,7 @@ public abstract class PermissionsResultAction {
      * @return this method returns true if its primary action has been completed
      * and it should be removed from the data structure holding a reference to it.
      */
-    public synchronized final boolean onResult(final @NonNull String permission, int result) {
+    synchronized final boolean onResult(final @NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             mPermissions.remove(permission);
             if (mPermissions.isEmpty()) {

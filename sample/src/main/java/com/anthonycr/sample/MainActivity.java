@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             @Override
                             public void onDenied(String permission) {
-                                Log.i(TAG, "onDenied: Write Storage");
+                                Log.i(TAG, "onDenied: Write Storage: " + permission);
                                 String message = String.format(Locale.getDefault(), getString(R.string.message_denied), permission);
                                 Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                             }
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.button_read_storage:
                 PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, new PermissionsResultAction() {
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, new PermissionsResultAction() {
 
                             @Override
                             public void onGranted() {
@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             @Override
                             public void onDenied(String permission) {
-                                Log.i(TAG, "onDenied: Read Storage");
+                                Log.i(TAG, "onDenied: Read Storage: " + permission);
                                 String message = String.format(Locale.getDefault(), getString(R.string.message_denied), permission);
                                 Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                             }
@@ -187,17 +187,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException ignored) {}
     }
 
-
-    // I found an issue, which can be seen from the logs, here is the steps:
-    // 1. click read contacts button, popup the dialog, select "Allow", the Log "onGranted: Read Contacts" shown.
-    // 2. click the read contacts button again, do the read contacts work directly, the Log "onGranted: Read Contacts" shown.
-    // 3. click the read storage button, popup the dialog, select "Deny".
-    // Bug: Both the Log "onDenied: Read Contacts" and "onDenied: Read Storage" shown.
-
-    // If we repeat the step 2 for many times, we will get many "onDenied: Read Contacts" logs on step 3.
-
-    // Reason: if we request a permission we already have, the onRequestPermissionsResult() is not invoked
-    // so the PermissionsManager.getInstance().notifyPermissionsChange(permissions, grantResults); is not invoked too.
 }
 
 

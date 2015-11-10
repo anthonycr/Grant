@@ -1,12 +1,11 @@
 package com.anthonycr.grant;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -14,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,17 +26,72 @@ import java.util.Set;
 public final class PermissionsManager {
 
     private static final String TAG = PermissionsManager.class.getSimpleName();
-    private static final String[] EMPTY_PERMISSIONS = new String[0];
     private static final PermissionsManager INSTANCE = new PermissionsManager();
 
     private final Set<String> mPendingRequests = new HashSet<>(1);
+    private final Set<String> mPermissions = new HashSet<>(1);
     private final List<WeakReference<PermissionsResultAction>> mPendingActions = new ArrayList<>(1);
+
 
     public static PermissionsManager getInstance() {
         return INSTANCE;
     }
 
-    private PermissionsManager() {}
+    private PermissionsManager() {
+        initializePermissionsMap();
+    }
+
+    /**
+     * This method uses reflection to read all the permissions in the Manifest class.
+     * This is necessary because some permissions do not exist on older versions of Android,
+     * since they do not exist, they will be denied when you check whether you have permission
+     * which is problematic since a new permission is often added where there was no previous
+     * permission required. We initialize a Set of available permissions and check the set
+     * when checking if we have permission since we want to know when we are denied a permission
+     * because it doesn't exist yet.
+     */
+    private synchronized void initializePermissionsMap() {
+        Field[] fields = Manifest.permission.class.getFields();
+        for (Field field : fields) {
+            String name = null;
+            try {
+                name = (String) field.get("");
+                Log.d(TAG, name);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            mPermissions.add(name);
+        }
+    }
+
+    /**
+     * This method retrieves all the permissions declared in the application's manifest.
+     * It returns a non null array of permisions that can be declared.
+     *
+     * @param activity the Activity necessary to check what permissions we have.
+     * @return a non null array of permissions that are declared in the application manifest.
+     */
+    @NonNull
+    private synchronized String[] getManifestPermissions(@NonNull final Activity activity) {
+        PackageInfo packageInfo = null;
+        List<String> list = new ArrayList<>(1);
+        try {
+            Log.d(TAG, activity.getPackageName());
+            packageInfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), PackageManager.GET_PERMISSIONS);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "A problem occurred when retrieving permissions", e);
+        }
+        if (packageInfo != null) {
+            String[] permissions = packageInfo.requestedPermissions;
+            if (permissions != null) {
+                for (String perm : permissions) {
+                    Log.d(TAG, "Manifest contained permission: " + perm);
+                    list.add(perm);
+                }
+            }
+        }
+        return list.toArray(new String[list.size()]);
+    }
 
     /**
      * This method adds the {@link PermissionsResultAction} to the current list
@@ -57,11 +112,19 @@ public final class PermissionsManager {
         mPendingActions.add(new WeakReference<>(action));
     }
 
-    private synchronized void removePendingAction(PermissionsResultAction action) {
+    /**
+     * This method removes a pending action from the list of pending actions.
+     * It is used for cases where the permission has already been granted, so
+     * you immediately wish to remove the pending action from the queue and
+     * execute the action.
+     *
+     * @param action the action to remove
+     */
+    private synchronized void removePendingAction(@Nullable PermissionsResultAction action) {
         for (Iterator<WeakReference<PermissionsResultAction>> iterator = mPendingActions.iterator();
              iterator.hasNext(); ) {
             WeakReference<PermissionsResultAction> weakRef = iterator.next();
-            if (weakRef.get() == action) {
+            if (weakRef.get() == action || weakRef.get() == null) {
                 iterator.remove();
             }
         }
@@ -130,30 +193,8 @@ public final class PermissionsManager {
         if (activity == null) {
             return;
         }
-        Handler handler = new Handler(Looper.getMainLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                PackageInfo packageInfo = null;
-                try {
-                    Log.d(TAG, activity.getPackageName());
-                    packageInfo = activity.getPackageManager().getPackageInfo(activity.getPackageName(), PackageManager.GET_PERMISSIONS);
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.e(TAG, "A problem occurred when retrieving permissions", e);
-                }
-                if (packageInfo != null) {
-                    String[] permissions = packageInfo.requestedPermissions;
-                    if (permissions != null) {
-                        for (String perm : permissions) {
-                            Log.d(TAG, "Requesting permission if necessary: " + perm);
-                        }
-                    } else {
-                        permissions = EMPTY_PERMISSIONS;
-                    }
-                    requestPermissionsIfNecessaryForResult(activity, permissions, action);
-                }
-            }
-        });
+        String[] perms = getManifestPermissions(activity);
+        requestPermissionsIfNecessaryForResult(activity, perms, action);
     }
 
     /**
@@ -266,14 +307,20 @@ public final class PermissionsManager {
     /**
      * When request permissions on devices before Android M (Android 6.0, API Level 23)
      * Do the granted or denied work directly according to the permission status
-     * @param activity the activity to check permissions
+     *
+     * @param activity    the activity to check permissions
      * @param permissions the permissions names
-     * @param action the callback work object, containing what we what to do after permission check
+     * @param action      the callback work object, containing what we what to do after
+     *                    permission check
      */
-    private void doPermissionWorkBeforeAndroidM(@Nullable Activity activity, @NonNull String[] permissions, @Nullable PermissionsResultAction action) {
+    private void doPermissionWorkBeforeAndroidM(@NonNull Activity activity,
+                                                @NonNull String[] permissions,
+                                                @Nullable PermissionsResultAction action) {
         for (String perm : permissions) {
             if (action != null) {
-                if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(activity, perm)
+                        != PackageManager.PERMISSION_GRANTED
+                        && mPermissions.contains(perm)) {
                     action.onResult(perm, PackageManager.PERMISSION_DENIED);
                 } else {
                     action.onResult(perm, PackageManager.PERMISSION_GRANTED);
@@ -286,13 +333,17 @@ public final class PermissionsManager {
      * Filter the permissions list:
      * If a permission is not granted, add it to the result list
      * if a permission is granted, do the granted work, do not add it to the result list
-     * @param activity the activity to check permissions
+     *
+     * @param activity    the activity to check permissions
      * @param permissions all the permissions names
-     * @param action the callback work object, containing what we what to do after permission check
+     * @param action      the callback work object, containing what we what to do after
+     *                    permission check
      * @return a list of permissions names that are not granted yet
      */
     @NonNull
-    private List<String> getPermissionsListToRequest(@Nullable Activity activity, @NonNull String[] permissions, @Nullable PermissionsResultAction action) {
+    private List<String> getPermissionsListToRequest(@NonNull Activity activity,
+                                                     @NonNull String[] permissions,
+                                                     @Nullable PermissionsResultAction action) {
         List<String> permList = new ArrayList<>(1);
         for (String perm : permissions) {
             if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
