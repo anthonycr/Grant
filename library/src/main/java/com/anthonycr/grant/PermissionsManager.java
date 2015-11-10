@@ -57,6 +57,16 @@ public final class PermissionsManager {
         mPendingActions.add(new WeakReference<>(action));
     }
 
+    private synchronized void removePendingAction(PermissionsResultAction action) {
+        for (Iterator<WeakReference<PermissionsResultAction>> iterator = mPendingActions.iterator();
+             iterator.hasNext(); ) {
+            WeakReference<PermissionsResultAction> weakRef = iterator.next();
+            if (weakRef.get() == action) {
+                iterator.remove();
+            }
+        }
+    }
+
     /**
      * This static method can be used to check whether or not you have a specific permission.
      * It is basically a less verbose method of using {@link ActivityCompat#checkSelfPermission(Context, String)}
@@ -169,29 +179,13 @@ public final class PermissionsManager {
         }
         addPendingAction(permissions, action);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            for (String perm : permissions) {
-                if (action != null) {
-                    if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                        action.onResult(perm, PackageManager.PERMISSION_DENIED);
-                    } else {
-                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
-                    }
-                }
-            }
+            doPermissionWorkBeforeAndroidM(activity, permissions, action);
         } else {
-            List<String> permList = new ArrayList<>(1);
-            for (String perm : permissions) {
-                if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                    if (!mPendingRequests.contains(perm)) {
-                        permList.add(perm);
-                    }
-                } else {
-                    if (action != null) {
-                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
-                    }
-                }
-            }
-            if (!permList.isEmpty()) {
+            List<String> permList = getPermissionsListToRequest(activity, permissions, action);
+            if (permList.isEmpty()) {
+                //if there is no permission to request, there is no reason to keep the action int the list
+                removePendingAction(action);
+            } else {
                 String[] permsToRequest = permList.toArray(new String[permList.size()]);
                 mPendingRequests.addAll(permList);
                 ActivityCompat.requestPermissions(activity, permsToRequest, 1);
@@ -222,29 +216,13 @@ public final class PermissionsManager {
         }
         addPendingAction(permissions, action);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            for (String perm : permissions) {
-                if (action != null) {
-                    if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                        action.onResult(perm, PackageManager.PERMISSION_DENIED);
-                    } else {
-                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
-                    }
-                }
-            }
+            doPermissionWorkBeforeAndroidM(activity, permissions, action);
         } else {
-            List<String> permList = new ArrayList<>(1);
-            for (String perm : permissions) {
-                if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
-                    if (!mPendingRequests.contains(perm)) {
-                        permList.add(perm);
-                    }
-                } else {
-                    if (action != null) {
-                        action.onResult(perm, PackageManager.PERMISSION_GRANTED);
-                    }
-                }
-            }
-            if (!permList.isEmpty()) {
+            List<String> permList = getPermissionsListToRequest(activity, permissions, action);
+            if (permList.isEmpty()) {
+                //if there is no permission to request, there is no reason to keep the action int the list
+                removePendingAction(action);
+            } else {
                 String[] permsToRequest = permList.toArray(new String[permList.size()]);
                 mPendingRequests.addAll(permList);
                 fragment.requestPermissions(permsToRequest, 1);
@@ -283,6 +261,51 @@ public final class PermissionsManager {
         for (int n = 0; n < size; n++) {
             mPendingRequests.remove(permissions[n]);
         }
+    }
+
+    /**
+     * When request permissions on devices before Android M (Android 6.0, API Level 23)
+     * Do the granted or denied work directly according to the permission status
+     * @param activity the activity to check permissions
+     * @param permissions the permissions names
+     * @param action the callback work object, containing what we what to do after permission check
+     */
+    private void doPermissionWorkBeforeAndroidM(@Nullable Activity activity, @NonNull String[] permissions, @Nullable PermissionsResultAction action) {
+        for (String perm : permissions) {
+            if (action != null) {
+                if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                    action.onResult(perm, PackageManager.PERMISSION_DENIED);
+                } else {
+                    action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                }
+            }
+        }
+    }
+
+    /**
+     * Filter the permissions list:
+     * If a permission is not granted, add it to the result list
+     * if a permission is granted, do the granted work, do not add it to the result list
+     * @param activity the activity to check permissions
+     * @param permissions all the permissions names
+     * @param action the callback work object, containing what we what to do after permission check
+     * @return a list of permissions names that are not granted yet
+     */
+    @NonNull
+    private List<String> getPermissionsListToRequest(@Nullable Activity activity, @NonNull String[] permissions, @Nullable PermissionsResultAction action) {
+        List<String> permList = new ArrayList<>(1);
+        for (String perm : permissions) {
+            if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+                if (!mPendingRequests.contains(perm)) {
+                    permList.add(perm);
+                }
+            } else {
+                if (action != null) {
+                    action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                }
+            }
+        }
+        return permList;
     }
 
 }

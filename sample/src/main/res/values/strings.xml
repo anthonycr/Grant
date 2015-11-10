@@ -4,6 +4,7 @@
     <string name="message_denied">Permission \"%1$s\" has been denied.</string>
     <string name="button_title_write_storage">Write to Storage</string>
     <string name="button_title_read_storage">Read from Storage</string>
+    <string name="button_title_read_phone_contacts">Read Phone Contacts</string>
     <string name="text_write">Wrote: \"%1$s\"</string>
     <string name="text_read">Read: \"%1$s\"</string>
     <string name="text_failure_write">Unable to write to storage.</string>
