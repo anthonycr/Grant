@@ -26,15 +26,18 @@ import java.util.Set;
 public class PermissionsManager {
 
     private static final String TAG = PermissionsManager.class.getSimpleName();
-    private static final PermissionsManager INSTANCE = new PermissionsManager();
 
     private final Set<String> mPendingRequests = new HashSet<>(1);
     private final Set<String> mPermissions = new HashSet<>(1);
     private final List<WeakReference<PermissionsResultAction>> mPendingActions = new ArrayList<>(1);
 
+    private static PermissionsManager mInstance = null;
 
     public static PermissionsManager getInstance() {
-        return INSTANCE;
+        if (mInstance == null) {
+            mInstance = new PermissionsManager();
+        }
+        return mInstance;
     }
 
     private PermissionsManager() {
@@ -56,9 +59,8 @@ public class PermissionsManager {
             String name = null;
             try {
                 name = (String) field.get("");
-                Log.d(TAG, name);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Could not access field", e);
             }
             mPermissions.add(name);
         }
@@ -318,12 +320,13 @@ public class PermissionsManager {
                                                 @Nullable PermissionsResultAction action) {
         for (String perm : permissions) {
             if (action != null) {
-                if (ActivityCompat.checkSelfPermission(activity, perm)
-                        != PackageManager.PERMISSION_GRANTED
-                        && mPermissions.contains(perm)) {
-                    action.onResult(perm, PackageManager.PERMISSION_DENIED);
+                if (!mPermissions.contains(perm)) {
+                    action.onResult(perm, Permissions.NOT_FOUND);
+                } else if (ActivityCompat.checkSelfPermission(activity, perm)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    action.onResult(perm, Permissions.DENIED);
                 } else {
-                    action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                    action.onResult(perm, Permissions.GRANTED);
                 }
             }
         }
@@ -346,13 +349,17 @@ public class PermissionsManager {
                                                      @Nullable PermissionsResultAction action) {
         List<String> permList = new ArrayList<>(1);
         for (String perm : permissions) {
-            if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
+            if (!mPermissions.contains(perm)) {
+                if (action != null) {
+                    action.onResult(perm, Permissions.NOT_FOUND);
+                }
+            } else if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
                 if (!mPendingRequests.contains(perm)) {
                     permList.add(perm);
                 }
             } else {
                 if (action != null) {
-                    action.onResult(perm, PackageManager.PERMISSION_GRANTED);
+                    action.onResult(perm, Permissions.GRANTED);
                 }
             }
         }

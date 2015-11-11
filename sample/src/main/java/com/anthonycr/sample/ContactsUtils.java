@@ -7,7 +7,7 @@ import android.provider.ContactsContract;
 import android.util.Log;
 
 public class ContactsUtils {
-    private static final String DEBUG_TAG = "PermissionTest";
+    private static final String TAG = ContactsUtils.class.getSimpleName();
 
     public static void readPhoneContacts(Context context) {
         ContentResolver contentResolver = context.getContentResolver();
@@ -16,7 +16,7 @@ public class ContactsUtils {
             while (cursor.moveToNext()) {
                 String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
                 String contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                Log.e(DEBUG_TAG, "================= " + contactName + " ==========");
+                Log.d(TAG, "================= " + contactName + " ==========");
                 if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
                     Cursor pCursor = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
@@ -27,19 +27,19 @@ public class ContactsUtils {
                             String phoneNo = pCursor.getString(pCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                             switch (phoneType) {
                                 case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE:
-                                    Log.i(contactName + ": TYPE_MOBILE", " " + phoneNo);
+                                    Log.i(contactName + ": TYPE_MOBILE", ' ' + phoneNo);
                                     break;
                                 case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
-                                    Log.i(contactName + ": TYPE_HOME", " " + phoneNo);
+                                    Log.i(contactName + ": TYPE_HOME", ' ' + phoneNo);
                                     break;
                                 case ContactsContract.CommonDataKinds.Phone.TYPE_WORK:
-                                    Log.i(contactName + ": TYPE_WORK", " " + phoneNo);
+                                    Log.i(contactName + ": TYPE_WORK", ' ' + phoneNo);
                                     break;
                                 case ContactsContract.CommonDataKinds.Phone.TYPE_WORK_MOBILE:
-                                    Log.i(contactName + ": TYPE_WORK_MOBILE", " " + phoneNo);
+                                    Log.i(contactName + ": TYPE_WORK_MOBILE", ' ' + phoneNo);
                                     break;
                                 case ContactsContract.CommonDataKinds.Phone.TYPE_OTHER:
-                                    Log.i(contactName + ": TYPE_OTHER", " " + phoneNo);
+                                    Log.i(contactName + ": TYPE_OTHER", ' ' + phoneNo);
                                     break;
                                 default:
                                     break;
