@@ -176,6 +176,18 @@ public class PermissionsManager {
     }
 
     /**
+     * This static method can be used to check whether or not you should show request permission rational.
+     * If you pass in a null Activity object, it will return true
+     * @param activity the Activity necessary to check the permission
+     * @param permission the permission to check
+     * @return false if user selected never ask permission again, true otherwise
+     */
+    @SuppressWarnings("unused")
+    public static boolean shouldShowRequestPermissionRationale(@Nullable Activity activity, @NonNull String permission) {
+        return activity == null || ActivityCompat.shouldShowRequestPermissionRationale(activity, permission);
+    }
+
+    /**
      * This method will request all the permissions declared in your application manifest
      * for the specified {@link PermissionsResultAction}. The purpose of this method is to enable
      * all permissions to be requested at one shot. The PermissionsResultAction is used to notify
