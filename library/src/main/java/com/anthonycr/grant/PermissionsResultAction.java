@@ -78,11 +78,13 @@ public abstract class PermissionsResultAction {
      * or false if the PermissionsResultAction should treat the
      * absence of the permission on the API level as a denial.
      */
+    @SuppressWarnings({"WeakerAccess", "SameReturnValue"})
     public synchronized boolean shouldIgnorePermissionNotFound(String permission) {
         Log.d(TAG, "Permission not found: " + permission);
         return true;
     }
 
+    @SuppressWarnings("WeakerAccess")
     protected synchronized final boolean onResult(final @NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             return onResult(permission, Permissions.GRANTED);
@@ -103,6 +105,7 @@ public abstract class PermissionsResultAction {
      * @return this method returns true if its primary action has been completed
      * and it should be removed from the data structure holding a reference to it.
      */
+    @SuppressWarnings("WeakerAccess")
     protected synchronized final boolean onResult(final @NonNull String permission, Permissions result) {
         mPermissions.remove(permission);
         if (result == Permissions.GRANTED) {
@@ -154,6 +157,7 @@ public abstract class PermissionsResultAction {
      *
      * @param perms the permissions to listen for
      */
+    @SuppressWarnings("WeakerAccess")
     protected synchronized final void registerPermissions(@NonNull String[] perms) {
         Collections.addAll(mPermissions, perms);
     }
