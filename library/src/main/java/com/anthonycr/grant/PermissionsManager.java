@@ -347,7 +347,7 @@ public class PermissionsManager {
     private List<String> getPermissionsListToRequest(@NonNull Activity activity,
                                                      @NonNull String[] permissions,
                                                      @Nullable PermissionsResultAction action) {
-        List<String> permList = new ArrayList<>(1);
+        List<String> permList = new ArrayList<>(permissions.length);
         for (String perm : permissions) {
             if (!mPermissions.contains(perm)) {
                 if (action != null) {

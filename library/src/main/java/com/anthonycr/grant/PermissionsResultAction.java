@@ -83,7 +83,7 @@ public abstract class PermissionsResultAction {
         return true;
     }
 
-    synchronized final boolean onResult(final @NonNull String permission, int result) {
+    protected synchronized final boolean onResult(final @NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             return onResult(permission, Permissions.GRANTED);
         } else {
@@ -103,7 +103,7 @@ public abstract class PermissionsResultAction {
      * @return this method returns true if its primary action has been completed
      * and it should be removed from the data structure holding a reference to it.
      */
-    synchronized final boolean onResult(final @NonNull String permission, Permissions result) {
+    protected synchronized final boolean onResult(final @NonNull String permission, Permissions result) {
         mPermissions.remove(permission);
         if (result == Permissions.GRANTED) {
             if (mPermissions.isEmpty()) {
@@ -154,7 +154,7 @@ public abstract class PermissionsResultAction {
      *
      * @param perms the permissions to listen for
      */
-    public synchronized final void registerPermissions(@NonNull String[] perms) {
+    protected synchronized final void registerPermissions(@NonNull String[] perms) {
         Collections.addAll(mPermissions, perms);
     }
 }
