@@ -3,6 +3,7 @@ package com.anthonycr.grant;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -85,6 +86,7 @@ public abstract class PermissionsResultAction {
     }
 
     @SuppressWarnings("WeakerAccess")
+    @CallSuper
     protected synchronized final boolean onResult(final @NonNull String permission, int result) {
         if (result == PackageManager.PERMISSION_GRANTED) {
             return onResult(permission, Permissions.GRANTED);
@@ -106,6 +108,7 @@ public abstract class PermissionsResultAction {
      * and it should be removed from the data structure holding a reference to it.
      */
     @SuppressWarnings("WeakerAccess")
+    @CallSuper
     protected synchronized final boolean onResult(final @NonNull String permission, Permissions result) {
         mPermissions.remove(permission);
         if (result == Permissions.GRANTED) {
@@ -158,6 +161,7 @@ public abstract class PermissionsResultAction {
      * @param perms the permissions to listen for
      */
     @SuppressWarnings("WeakerAccess")
+    @CallSuper
     protected synchronized final void registerPermissions(@NonNull String[] perms) {
         Collections.addAll(mPermissions, perms);
     }
