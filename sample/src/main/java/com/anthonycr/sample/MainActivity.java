@@ -55,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        boolean hasPermission = PermissionsManager.getInstance().hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        Log.d(TAG, "Has " + Manifest.permission.READ_EXTERNAL_STORAGE + " permission: " + hasPermission);
+
         Button writeStorage = (Button) findViewById(R.id.button_write_storage);
         Button readStorage = (Button) findViewById(R.id.button_read_storage);
         Button readContacts = (Button) findViewById(R.id.button_read_contacts);

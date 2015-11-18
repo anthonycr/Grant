@@ -145,9 +145,9 @@ public class PermissionsManager {
      * @return true if you have been granted the permission, false otherwise
      */
     @SuppressWarnings("unused")
-    public static boolean hasPermission(@Nullable Context context, @NonNull String permission) {
-        return context != null && ActivityCompat.checkSelfPermission(context, permission)
-                == PackageManager.PERMISSION_GRANTED;
+    public synchronized boolean hasPermission(@Nullable Context context, @NonNull String permission) {
+        return context != null && (ActivityCompat.checkSelfPermission(context, permission)
+                == PackageManager.PERMISSION_GRANTED || !mPermissions.contains(permission));
     }
 
     /**
@@ -163,14 +163,13 @@ public class PermissionsManager {
      * @return true if you have been granted all the permissions, false otherwise
      */
     @SuppressWarnings("unused")
-    public static boolean hasAllPermissions(@Nullable Context context, @NonNull String[] permissions) {
+    public synchronized boolean hasAllPermissions(@Nullable Context context, @NonNull String[] permissions) {
         if (context == null) {
             return false;
         }
         boolean hasAllPermissions = true;
         for (String perm : permissions) {
-            hasAllPermissions &= ActivityCompat.checkSelfPermission(context, perm)
-                    == PackageManager.PERMISSION_GRANTED;
+            hasAllPermissions &= hasPermission(context, perm);
         }
         return hasAllPermissions;
     }
