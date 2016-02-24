@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -353,6 +354,16 @@ public class PermissionsManager {
             if (!mPermissions.contains(perm)) {
                 if (action != null) {
                     action.onResult(perm, Permissions.NOT_FOUND);
+                }
+            } else if (Manifest.permission.SYSTEM_ALERT_WINDOW.equals(perm)) {
+                if (Settings.canDrawOverlays(activity)) {
+                    if (action != null) {
+                        action.onResult(perm, Permissions.GRANTED);
+                    }
+                } else {
+                    if (!mPendingRequests.contains(perm)) {
+                        permList.add(perm);
+                    }
                 }
             } else if (ActivityCompat.checkSelfPermission(activity, perm) != PackageManager.PERMISSION_GRANTED) {
                 if (!mPendingRequests.contains(perm)) {
