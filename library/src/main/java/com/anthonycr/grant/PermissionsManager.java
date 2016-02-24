@@ -1,6 +1,7 @@
 package com.anthonycr.grant;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -342,6 +343,7 @@ public class PermissionsManager {
      *                    permission check
      * @return a list of permissions names that are not granted yet
      */
+    @TargetApi(Build.VERSION_CODES.M)
     @NonNull
     private List<String> getPermissionsListToRequest(@NonNull Activity activity,
                                                      @NonNull String[] permissions,
