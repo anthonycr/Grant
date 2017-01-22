@@ -9,7 +9,7 @@ subprojects {
             jcenter()
         }
         dependencies {
-            classpath 'com.android.tools.build:gradle:1.3.0'
+            classpath 'com.android.tools.build:gradle:2.2.3'
             classpath 'com.github.dcendents:android-maven-plugin:1.2'
         }
     }
@@ -21,9 +21,9 @@ task clean(type: Delete) {
 
 ext {
     minSdkVersion = 9
-    compileSdkVersion = 23
+    compileSdkVersion = 25
     targetSdkVersion = compileSdkVersion
-    buildToolsVersion = "23.0.1"
+    buildToolsVersion = "25.0.2"
     versionCode = 4
     versionName = '1.1.2'
 

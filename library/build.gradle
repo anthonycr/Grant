@@ -7,13 +7,13 @@ android {
     defaultConfig {
         minSdkVersion project.minSdkVersion
         targetSdkVersion project.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode project.versionCode
+        versionName project.versionName
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:appcompat-v7:25.1.0'
 }
 
 apply from: '../library-release.gradle'
