@@ -1,6 +1,7 @@
 package com.anthonycr.sample;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getPath() + "/test.txt";
     private TextView textView;
 
+    @SuppressLint("InlinedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         PermissionsManager.getInstance().notifyPermissionsChange(permissions, grantResults);
     }
 
+    @SuppressLint("InlinedApi")
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
