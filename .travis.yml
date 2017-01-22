@@ -4,6 +4,7 @@ jdk:
   - oraclejdk8
 android:
   components:
+    - tools
     - build-tools-25.0.2
     - android-25
     - extra-android-support
@@ -16,5 +17,5 @@ before_install:
 install:
   - ./gradlew
 script:
-  - ./gradlew :library:build
-  - ./gradlew :sample:build
+  - ./gradlew :library:build --stacktrace
+  - ./gradlew :sample:build --stacktrace
