@@ -17,5 +17,5 @@ before_install:
 install:
   - ./gradlew
 script:
-  - ./gradlew :library:build --stacktrace
-  - ./gradlew :sample:build --stacktrace
+  - ./gradlew :library:assembleDebug --stacktrace
+  - ./gradlew :sample:assembleDebug --stacktrace
