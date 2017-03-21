@@ -1,18 +1,18 @@
 # Grant
-####Simplifying Android Permissions###
+#### Simplifying Android Permissions
 [![Build Status](https://travis-ci.org/anthonycr/Grant.svg)](https://travis-ci.org/anthonycr/Grant)
 
-###Gradle usage
+### Gradle usage
 * `compile 'com.anthonycr.grant:permissions:1.0'`
 * Available from jcenter
 
-##What can this library do?
+## What can this library do?
 * It can request all your declared permissions in a single method and give you a callback when they have been granted.
 * It can perform a task at some point in the future that requires a specific permission by checking if the app has the permission and requesting the permission if you do not already have it.
 * It keeps your application logic simpler, no need to manage your permissions sensitive code inside the `onRequestPermissionsResult` and figure out what you need to call.
 * If you're already convinced of this need for this library, **skip the next section** and go to the "How to use" section, otherwise read the next section and see how confusing permissions can get.
 
-##Why is this library needed?
+## Why is this library needed?
 The Android permissions model has changed in Android Marshmallow. Now you can't count on all the permissions you've declared in your `AndroidManifest` file being granted at run-time. The user has control over granting these permissions to your app and can revoke them at any time, even while your app is running! Because of this, you need to check if you have permission to run certain code before executing it.
 
 
@@ -62,17 +62,17 @@ public void onRequestPermissionsResult(int requestCode,
 ```
 You need to figure out where the request originated from based on the request code and need to figure out how to respond to the results you get back. You need to compare the results to the permissions, and further muddy up your application logic.
 
-#####THIS IS TOO MESSY FOR SOMETHING SIMPLE
+##### THIS IS TOO MESSY FOR SOMETHING SIMPLE
 
 So... this is why we have Grant. Using Grant, you wrap your code in an anonymous `PermissionsResultAction` class, and send that and an array of the permissions that are required to run your code to the `PermissionsManager`, which handles all the request logic and executes your code when all the permissions have been granted by the user. This way, you don't have to break and muddy up your application logic.
 
-##How to Use
+## How to Use
 
-####The Main Classes
+#### The Main Classes
 * `PermissionsManager`: This is a singleton class that handles all the permissions requests, logic, and callbacks.
 * `PermissionsResultAction`: This is a callback that you use to execute code when the permissions you have requested are either granted or denied.
 
-####The How-To
+#### The How-To
 An Activity reference is needed to request permissions. All you need to add to your Activities is a single line of code that notifies the `PermissionsManager` of the `Activity` callback. For API 23 and above, you should override the `Activity` callback `onRequestedPermissionsResult` in each of your Activities from which you make permissions requests. You should then add the following line of code to it so that the `PermissionsManager` can receive all the changes in the permissions being granted to your application:
 
 ```java
@@ -86,7 +86,7 @@ public void onRequestPermissionsResult(int requestCode,
 
 This will trigger the `PermissionsManager` to notify all actions that you have sent to it so they can run.
 
-####General Use Case
+#### General Use Case
 
 Then, in your code, when you need to execute code that requires permissions, instead of checking and requesting and handling the `Activity` callback manually, you can just wrap your code in an anonymous class and send it to the permissions manager like follows. For this example, we pretend we have a method `writeToStorage()` that requires the `WRITE_EXTERNAL_STORAGE` permission to function:
 
@@ -107,11 +107,11 @@ PermissionsManager.getInstance().requestPermissionsIfNecessaryForResult(this,
     }
 });
 ```
-#####BOOM. DONE. That's it. No messing around with weird logic and result codes.
+##### BOOM. DONE. That's it. No messing around with weird logic and result codes.
 
 You can add any number of permissions to a request, and the `PermissionsResultAction.onGranted()` will not be triggered until all the permissions have been granted by the user. If a permission is denied by the user, the `onDenied(String)` will be called and the `PermissionsResultAction` will be removed from the queue and will no longer listen for permissions changes.
 
-####Global Use Case
+#### Global Use Case
 
 But, maybe in addition to this, you just need to get it out of the way and request all the permissions up front so that you don't need to break the user flow later (this is not recommended as it's bad for the user, but maybe your PM is requiring you to do it). In that case, you can just use a simple method which reads the permissions you want from your manifest and requests them for you like follows:
 
@@ -132,7 +132,7 @@ PermissionsManager.getInstance().requestAllManifestPermissionsIfNecessary(this,
 
 Note: you will still need to handle the permission checks before executing your code as the user could deny the permission from device settings while your app is running.
 
-####Other Use Cases
+#### Other Use Cases
 
 Additionally, the library contains a couple methods to check whether you have permission for one or several permissions that is slightly less verbose than using one of the compat libaries. Particularly `boolean hasAllPermissions(Context context, String[] permissions)` is helpful when checking if you have all of several permissions quickly. An example use case would be if you requested all permissions when you first start the app, but the user denied some of those permissions, so elsewhere in your app you want to know if you have all the permissions necessary for an action or not so you can display a different UI element.
 
@@ -140,7 +140,8 @@ And that's it! Contributions and suggestions are welcome. Check out the sample a
 
 Got questions? Hit me up on [twitter](https://twitter.com/RestainoAnthony).
 
-##License
+## License
+```
 Copyright 2015 Anthony Restaino
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,3 +155,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+```
