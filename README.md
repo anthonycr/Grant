@@ -1,6 +1,13 @@
 # Grant
 #### Simplifying Android Permissions
-[![Build Status](https://travis-ci.org/anthonycr/Grant.svg)](https://travis-ci.org/anthonycr/Grant)
+
+| Branch | Build Status |
+|--------|--------------|
+| master | [![Build Status](https://travis-ci.org/anthonycr/Grant.svg)](https://travis-ci.org/anthonycr/Grant) |
+
+| Latest Version |
+|----------------|
+| [![Download](https://api.bintray.com/packages/anthonycr/android/com.anthonycr.grant%3Apermissions/images/download.svg)](https://bintray.com/anthonycr/android/com.anthonycr.grant%3Apermissions/_latestVersion) |
 
 ### Gradle usage
 * `compile 'com.anthonycr.grant:permissions:1.0'`
