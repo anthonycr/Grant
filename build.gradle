@@ -26,8 +26,8 @@ ext {
     compileSdkVersion = 30
     targetSdkVersion = compileSdkVersion
     buildToolsVersion = "30.0.2"
-    versionCode = 4
-    versionName = '1.1.2'
+    versionCode = 5
+    versionName = '1.2.0'
 
     PUBLISH_GROUP_ID = 'com.anthonycr.grant'
     PUBLISH_ARTIFACT_ID = 'permissions'
